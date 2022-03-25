@@ -1,6 +1,6 @@
 import os
-import time
 import glob
+from time import time
 from typing import Any, Optional
 
 import jsonpickle
@@ -20,12 +20,12 @@ class FileSystemCache(Cache):
         return self.get(key) is not None
 
     def get(self, key: str, default: Any = None) -> Any:
-        cache_file_name = self._get_file_name(key)
+        cache_file = self._get_file_name(key)
         try:
-            with open(cache_file_name, 'r') as cache:
+            with open(cache_file, 'r') as cache:
                 content = jsonpickle.decode(cache.read())
 
-            if int(time.time() - os.path.getmtime(cache_file_name)) >= content['ttl']:
+            if int(time() - os.path.getmtime(cache_file)) >= content['ttl']:
                 os.remove(self._get_file_name(key))
                 raise FileNotFoundError
 

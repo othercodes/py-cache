@@ -9,7 +9,8 @@ class Cache(metaclass=ABCMeta):  # pragma: no cover
         Check if the given key exists in the cache.
 
         :param key: str The key to search for.
-        :return: bool True if the key exists, false otherwise (expired values returns False).
+        :return: bool True if the key exists, false otherwise (expired
+                      values returns False).
         """
 
     @abstractmethod
@@ -18,10 +19,13 @@ class Cache(metaclass=ABCMeta):  # pragma: no cover
         Get the required value by key from the cache.
 
         :param key: str The key of the stored value.
-        :param default: Any The default value to use if the key has no value in cache, None by default.
-                        If the default value is a callable, the result value of the execution will be stored in the
-                        cache. The expiration time is 900 seconds. The callable may return a Tuple[Any, int] with the
-                        actual value as first element and the desired expired time as second value.
+        :param default: Any The default value to use if the key has no value in
+                        cache, None by default. If the default value is a
+                        callable, the result value of the execution will
+                        be stored in the cache. The expiration time is 900
+                        seconds. The callable may return a Tuple[Any, int]
+                        with the actual value as first element and the desired
+                        expired time as second value.
         :return: Any The requested value by key.
         """
 
