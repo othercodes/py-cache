@@ -1,6 +1,6 @@
 import os
-import sqlite3
 import time
+from sqlite3 import Connection, IntegrityError
 from typing import Any, Optional
 
 import jsonpickle
@@ -20,7 +20,7 @@ class SQLiteCache(Cache):
     _insert_sql = 'INSERT INTO `entries` (`key`, `value`, `expire_at`) VALUES (?, ?, ?)'
     _clear_sql = 'DELETE FROM `entries`'
 
-    _connection = None
+    _connection: Optional[Connection] = None
 
     def __init__(self, directory_path: str, ttl: int = 900, name: str = 'cache'):
         self.directory_path = directory_path.strip().rstrip('/')
@@ -30,11 +30,11 @@ class SQLiteCache(Cache):
         os.makedirs(self.directory_path, exist_ok=True)
 
     @property
-    def connection(self):
+    def connection(self) -> Connection:
         if self._connection:
             return self._connection
 
-        connection = sqlite3.Connection(
+        connection = Connection(
             os.path.join(self.directory_path, f'{self.name}.sqlite'),
             timeout=15
         )
@@ -76,7 +76,7 @@ class SQLiteCache(Cache):
         with self.connection as connection:
             try:
                 connection.execute(self._insert_sql, (key, serialized, expiration))
-            except sqlite3.IntegrityError:
+            except IntegrityError:
                 connection.execute(self._replace_sql, (key, serialized, expiration))
 
         return value

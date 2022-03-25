@@ -1,5 +1,7 @@
 # Py-Cache
 
+[![Test](https://github.com/othercodes/py-cache/actions/workflows/test.yml/badge.svg)](https://github.com/othercodes/py-cache/actions/workflows/test.yml)
+
 Small cache implementation for python.
 
 ## Installation
