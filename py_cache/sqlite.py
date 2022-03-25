@@ -16,6 +16,7 @@ class SQLiteCache(Cache):
     _create_index = 'CREATE INDEX IF NOT EXISTS `keyname_index` ON `entries` (`key`)'
     _get_sql = 'SELECT `value`, `expire_at` FROM `entries` WHERE `key` = ?'
     _del_sql = 'DELETE FROM `entries` WHERE `key` = ?'
+    _del_expired_sql = 'DELETE FROM `entries` WHERE ? >= `expire_at`'
     _replace_sql = 'REPLACE INTO `entries` (`key`, `value`, `expire_at`) VALUES (?, ?, ?)'
     _insert_sql = 'INSERT INTO `entries` (`key`, `value`, `expire_at`) VALUES (?, ?, ?)'
     _clear_sql = 'DELETE FROM `entries`'
@@ -72,12 +73,12 @@ class SQLiteCache(Cache):
 
     def put(self, key: str, value: Any, ttl: Optional[int] = None) -> Any:
         serialized = jsonpickle.encode(value)
-        expiration = (ttl if ttl else self.ttl) + time.time()
+        expire_at = (self.ttl if ttl is None else ttl) + time.time()
         with self.connection as connection:
             try:
-                connection.execute(self._insert_sql, (key, serialized, expiration))
+                connection.execute(self._insert_sql, (key, serialized, expire_at))
             except IntegrityError:
-                connection.execute(self._replace_sql, (key, serialized, expiration))
+                connection.execute(self._replace_sql, (key, serialized, expire_at))
 
         return value
 
@@ -85,9 +86,12 @@ class SQLiteCache(Cache):
         with self.connection as connection:
             connection.execute(self._del_sql, (key,))
 
-    def flush(self) -> None:
+    def flush(self, expired_only: bool = False) -> None:
         with self.connection as connection:
-            connection.execute(self._clear_sql, )
+            if expired_only:
+                connection.execute(self._del_expired_sql, (time.time(),))
+            else:
+                connection.execute(self._clear_sql, )
 
     def __del__(self):
         if self.connection:

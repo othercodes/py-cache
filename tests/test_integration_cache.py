@@ -44,3 +44,16 @@ def test_adapter_cache_should_flush_all_values(adapters):
         assert not adapter.has('b')
         assert not adapter.has('c')
         assert not adapter.has('d')
+
+
+def test_adapter_cache_should_flush_only_expired_values(adapters):
+    for adapter in adapters():
+        adapter.put('x', 'some-value-1', 3600)
+        adapter.put('y', 'some-value-2', 0)
+        adapter.put('z', 'some-value-3', 0)
+
+        adapter.flush(expired_only=True)
+
+        assert adapter.has('x')
+        assert not adapter.has('y')
+        assert not adapter.has('z')
