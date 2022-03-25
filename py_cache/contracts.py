@@ -50,9 +50,10 @@ class Cache(metaclass=ABCMeta):  # pragma: no cover
         """
 
     @abstractmethod
-    def flush(self) -> None:
+    def flush(self, expired_only: bool = False) -> None:
         """
         Delete all the items in the cache.
 
+        :param expired_only: bool If True only the expired values will be deleted.
         :return:
         """
