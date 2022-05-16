@@ -1,5 +1,6 @@
 import os
 import glob
+import re
 import time
 from typing import Any, Optional
 
@@ -14,6 +15,7 @@ class FileSystemCache(Cache):
         self.ttl = ttl
 
     def _get_file_name(self, key: str) -> str:
+        key = re.sub(r"[:\/]", "_", key)
         return f'{self.directory_path}/cache.{key}.json'
 
     def _get_file_contents(self, file_name: str) -> Any:
