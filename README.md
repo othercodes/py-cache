@@ -1,6 +1,7 @@
 # Py-Cache
 
 [![Test](https://github.com/othercodes/py-cache/actions/workflows/test.yml/badge.svg)](https://github.com/othercodes/py-cache/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/othercodes/py-cache/branch/master/graph/badge.svg?token=MSNTHXcCVC)](https://codecov.io/gh/othercodes/py-cache)
 
 Small cache implementation for python.
 
