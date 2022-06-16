@@ -1,3 +1,5 @@
+from py_cache.null import NullCache
+
 COUNT = 0
 COMPLEX_KEY = 'https://some.url.com/id/8b3a6052-621e-45cc-be5a-316f486c50aa'
 
@@ -20,8 +22,13 @@ def test_adapter_cache_should_cache_values_by_key(adapters):
         a = adapter.get(COMPLEX_KEY, lambda: (increment(True), 20))
         b = adapter.get(COMPLEX_KEY)
 
-        assert 1 == a == b
-        assert adapter.has(COMPLEX_KEY)
+        if isinstance(adapter, NullCache):
+            assert a == 1
+            assert b is None
+            assert not adapter.has(COMPLEX_KEY)
+        else:
+            assert 1 == a == b
+            assert adapter.has(COMPLEX_KEY)
 
 
 def test_adapter_cache_should_delete_expired_values(adapters):
@@ -30,7 +37,10 @@ def test_adapter_cache_should_delete_expired_values(adapters):
         adapter.put('y', 'some-value-2', 0)
         adapter.put('z', 'some-value-3', 0)
 
-        assert adapter.has('x')
+        if isinstance(adapter, NullCache):
+            assert not adapter.has('x')
+        else:
+            assert adapter.has('x')
         assert not adapter.has('y')
         assert not adapter.has('z')
 
@@ -65,7 +75,9 @@ def test_adapter_cache_should_flush_only_expired_values(adapters):
         adapter.put('z', 'some-value-3', 0)
 
         adapter.flush(expired_only=True)
-
-        assert adapter.has('x')
+        if isinstance(adapter, NullCache):
+            assert not adapter.has('x')
+        else:
+            assert adapter.has('x')
         assert not adapter.has('y')
         assert not adapter.has('z')
