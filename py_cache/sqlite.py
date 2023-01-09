@@ -23,21 +23,44 @@ class SQLiteCache(Cache):
 
     _connection: Optional[Connection] = None
 
-    def __init__(self, directory_path: str, ttl: int = 900, name: str = 'cache'):
+    def __init__(self, directory_path: str, ttl: int = 900, name: str = 'cache', options: Optional[dict] = None):
         self.directory_path = directory_path.strip().rstrip('/')
         self.ttl = ttl
         self.name = name
+
+        # The available options are: https://docs.python.org/3.8/library/sqlite3.html#sqlite3.connect
+        self.options = {
+            # By default, check_same_thread is True and only the creating thread may use the connection. If set False,
+            # the returned connection may be shared across multiple threads. When using multiple threads with the same
+            # connection writing operations should be serialized by the user to avoid data corruption.
+            'check_same_thread': False,
+            # When a database is accessed by multiple connections, and one of the processes modifies the database, the
+            # SQLite database is locked until that transaction is committed. The timeout parameter specifies how long
+            # the connection should wait for the lock to go away until raising an exception. The default for the timeout
+            # parameter is 5.0 (five seconds).
+            'timeout': 15.0
+        }
+        self.options.update(options or {})
 
         os.makedirs(self.directory_path, exist_ok=True)
 
     @property
     def connection(self) -> Connection:
+        """
+        Returns the Connection object. If no available connection opens a
+        connection to the SQLite database file database. By default, returns a
+        Connection object, unless a custom factory is given.
+
+        https://docs.python.org/3.8/library/sqlite3.html#sqlite3.connect
+
+        :return: Connection
+        """
         if self._connection:
             return self._connection
 
         connection = Connection(
             os.path.join(self.directory_path, f'{self.name}.sqlite'),
-            timeout=15
+            **self.options
         )
 
         with connection:
